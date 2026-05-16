@@ -1,0 +1,120 @@
+.gutengrid-admin {
+    max-width: 600px;
+    margin-top: 2rem;
+
+    h1 {
+        margin-bottom: 1.5rem;
+    }
+
+    &__notice {
+        margin-bottom: 1.5rem;
+    }
+
+    &__row {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+
+        &:hover {
+            border-color: #999;
+        }
+    }
+
+    &__drag-handle {
+        padding: 0.25rem;
+        margin-top: 1.75rem; // align with inputs
+        background: none;
+        border: none;
+        cursor: grab;
+        color: #999;
+        font-size: 1.25rem;
+        line-height: 1;
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+
+            &:focus {
+                border-color: #007cba;
+                outline: none;
+                box-shadow: 0 0 0 1px #007cba;
+            }
+
+            &.has-error {
+                border-color: #d63638;
+
+                &:focus {
+                    box-shadow: 0 0 0 1px #d63638;
+                }
+            }
+        }
+    }
+
+    &__error {
+        font-size: 0.75rem;
+        color: #d63638;
+    }
+
+    &__remove {
+        padding: 0.25rem 0.5rem;
+        margin-top: 1.75rem; // align with inputs
+        background: none;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        color: #999;
+        cursor: pointer;
+        line-height: 1;
+
+        &:hover {
+            color: #d63638;
+            border-color: #d63638;
+        }
+    }
+
+    &__add {
+        display: block;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: none;
+        border: 1px dashed #ddd;
+        border-radius: 4px;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        color: #555;
+
+        &:hover {
+            border-color: #007cba;
+            color: #007cba;
+        }
+    }
+
+    &__save {
+        margin-top: 1.5rem;
+    }
+}

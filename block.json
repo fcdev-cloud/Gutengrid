@@ -1,0 +1,35 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "gutengrid/grid",
+  "title": "GutenGrid",
+  "category": "layout",
+  "description": "A 12-column container query grid block.",
+  "keywords": [ "grid", "layout", "columns" ],
+  "textdomain": "gutengrid",
+  "editorScript": "file:../../build/index.js",
+  "editorStyle": "file:../../build/index.css",
+  "style": "file:../../build/style-index.css",
+  "supports": {
+    "html": false,
+    "align": [ "wide", "full" ],
+    "spacing": {
+      "padding": true,
+      "margin": true,
+      "blockGap": true
+    },
+    "color": {
+      "background": true
+    }
+  },
+  "attributes": {
+    "columnGap": {
+      "type": "string",
+      "default": "1.5rem"
+    },
+    "rowGap": {
+      "type": "string",
+      "default": "1.5rem"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+.gutengrid {
+    container-type: inline-size;
+
+    &__inner {
+        display: grid;
+        grid-template-columns: repeat( 12, 1fr );
+        gap: var( --gutengrid-gap, 1.5rem );
+    }
+}

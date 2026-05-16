@@ -1,0 +1,101 @@
+.gutengrid {
+    position: relative;
+    min-height: 100px;
+
+    &__inner {
+        position: relative;
+        display: block !important; // reset — useLayoutEffect handles grid in the editor
+        // Ensure inner blocks sit above the overlay
+        > .block-editor-inner-blocks,
+        > .block-editor-inner-blocks > .block-editor-block-list__layout {
+            position: relative;
+            z-index: 1;
+        }
+
+        > .block-editor-inner-blocks > .block-editor-block-list__layout {
+            display: grid;
+            grid-template-columns: repeat( 12, 1fr );
+            gap: var(--gutengrid-gap);
+        }
+    }
+
+    &--overlay {
+        .gutengrid__inner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat( 12, 1fr );
+            column-gap: var( --gutengrid-column-gap, 1.5rem );
+            row-gap: var( --gutengrid-row-gap, 1.5rem );
+            pointer-events: none;
+            z-index: 0;
+            background-image: repeating-linear-gradient(
+                to right,
+                rgba( 99, 102, 241, 0.08 ) 0,
+                rgba( 99, 102, 241, 0.08 ) calc( ( 100% - ( 11 * var( --gutengrid-gap, 1.5rem ) ) ) / 12 ),
+                transparent calc( ( 100% - ( 11 * var( --gutengrid-column-gap, 1.5rem ) ) ) / 12 ),
+                transparent calc( ( 100% - ( 11 * var( --gutengrid-column-gap, 1.5rem ) ) ) / 12 + var( --gutengrid-column-gap, 1.5rem ) )
+            );
+        }
+    }
+}
+.gutengrid-resize-container > * {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+// Inspector controls
+.gutengrid-controls {
+    &__label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    &__breakpoint {
+        padding: 0.75rem 0;
+        border-top: 1px solid #ddd;
+
+        &:first-child {
+            border-top: none;
+        }
+    }
+}
+
+.gutengrid-resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: #007cba;
+    opacity: 0;
+    cursor: ew-resize;
+    transition: opacity 0.15s ease;
+    border-radius: 4px;
+    z-index: 10;
+
+    &--left  { left: -4px; }
+    &--right { right: -4px; }
+
+    .wp-block:hover &,
+    .wp-block.is-selected & {
+        opacity: 1;
+    }
+}
+
+body.is-resizing-gutengrid {
+    /* Prevents other blocks from stealing the 'mouseup' event */
+    cursor: col-resize !important;
+}
+
+body.is-resizing-gutengrid * {
+    /* Ensures nothing else intercepts the mouse release */
+    pointer-events: none !important;
+}
+
+body.is-resizing-gutengrid .gutengrid-resize-handle {
+    /* Keeps the handles active so you can actually click them */
+    pointer-events: all !important;
+}
