@@ -51,7 +51,7 @@ export default function BreakpointRow( { breakpoint, errors, onChange, onRemove 
                 </div>
 
                 <div className="gutengrid-admin__field">
-                    <label>{ __( 'Min width', 'gutengrid' ) }</label>
+                    <label>{ __( 'Max width', 'gutengrid' ) }</label>
                     <input
                         type="text"
                         value={ width }

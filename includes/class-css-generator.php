@@ -43,18 +43,13 @@ class GutenGrid_CSS_Generator {
 
         // Per-breakpoint utility classes with ranged container queries
         foreach ( $breakpoints as $index => $bp ) {
-            $min_width  = $bp['width'];
-            $next_bp    = $breakpoints[ $index + 1 ] ?? null;
-            $max_width  = $next_bp ? $next_bp['width'] : null;
+            $prev_bp    = $breakpoints[ $index - 1 ] ?? null;
+            $min_width  = $prev_bp ? $prev_bp['width'] : '0px';
+            $max_width  = $bp['width'];
 
             $css .= "/* Breakpoint: {$bp['name']} ({$min_width}" . ( $max_width ? " — {$max_width}" : "+" ) . ") */\n";
 
-            if ( $max_width ) {
-                $css .= "@container (min-width: {$min_width}) and (max-width: calc( {$max_width} - 1px )) {\n";
-            } else {
-                // Last breakpoint — no upper bound
-                $css .= "@container (min-width: {$min_width}) {\n";
-            }
+            $css .= "@media (min-width: calc({$min_width} + 1px)) and (max-width: {$max_width}) {\n";
 
             $css .= self::build_utility_classes( $bp['name'] );
             $css .= "}\n\n";
@@ -76,12 +71,15 @@ class GutenGrid_CSS_Generator {
         $css .= "    --gg-cols: {$base['cols']};\n";
         $css .= "}\n\n";
 
-        foreach ( $breakpoints as $bp ) {
+        foreach ( $breakpoints as $index => $bp ) {
+            $prev_bp    = $breakpoints[ $index - 1 ] ?? null;
+            $min_width  = $prev_bp ? $prev_bp['width'] : '0px';
+            $max_width  = $bp['width'];
             $col_gap = $bp['colGap'] ?? '1.5rem';
             $row_gap = $bp['rowGap'] ?? '1.5rem';
             $cols    = $bp['cols']   ?? self::COLUMNS;
 
-            $css .= "@media (min-width: {$bp['width']}) {\n";
+            $css .= "@media (min-width: calc({$min_width} + 1px)) and (max-width: {$max_width}) {\n";
             $css .= "    :root {\n";
             $css .= "        --gg-{$bp['name']}-col-gap: {$col_gap};\n";
             $css .= "        --gg-{$bp['name']}-row-gap: {$row_gap};\n";

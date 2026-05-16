@@ -7,7 +7,7 @@ export default function BaseSettings( { base, errors, onChange } ) {
         <div className="gutengrid-admin__base">
             <h2>{ __( 'Base Settings', 'gutengrid' ) }</h2>
             <p className="gutengrid-admin__base-description">
-                { __( 'Default grid settings applied below the smallest breakpoint.', 'gutengrid' ) }
+                { __( 'Default grid settings. Falls back to these values when no other breakpoints are matched.', 'gutengrid' ) }
             </p>
 
             <div className="gutengrid-admin__fields">

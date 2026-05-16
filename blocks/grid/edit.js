@@ -56,7 +56,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
         const currentBP = breakpoints.find( ( bp ) => bp.name === activeDevice );
 
         if ( currentBP && currentBP.width ) {
-            editorCanvas.style.width      = parseInt( currentBP.width ) + 100 + 'px';
+            editorCanvas.style.width      =  currentBP.width;
             editorCanvas.style.transition = 'width 0.3s ease-in-out';
             editorCanvas.style.margin     = '0 auto';
             editorCanvas.style.display    = 'block';
