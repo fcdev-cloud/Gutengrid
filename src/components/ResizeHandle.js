@@ -1,7 +1,5 @@
 import { useRef, useEffect } from '@wordpress/element';
 
-const COLS = 12;
-
 const getGridInner = ( element ) => {
     let node = element.parentElement;
     while ( node ) {
@@ -11,8 +9,8 @@ const getGridInner = ( element ) => {
     return null;
 };
 
-const snapToColumn = ( mouseX, gridRect, type ) => {
-    const colWidth = gridRect.width / COLS;
+const snapToColumn = ( mouseX, gridRect, type, cols ) => {
+    const colWidth = gridRect.width / cols;
     const relativeX = mouseX - gridRect.left;
     
     // Calculate the nearest grid line (0 to 12)
@@ -20,30 +18,34 @@ const snapToColumn = ( mouseX, gridRect, type ) => {
     
     if ( type === 'start' ) {
         // Line 0 is actually column start 1
-        return Math.max( 1, Math.min( COLS, line + 1 ) );
+        return Math.max( 1, Math.min( cols, line + 1 ) );
     } else {
         // Line 1 is the end of column 1 (track 2)
         // Line 12 is the end of column 12 (track 13)
-        return Math.max( 2, Math.min( COLS + 1, line + 1 ) );
+        return Math.max( 2, Math.min( cols + 1, line + 1 ) );
     }
 };
 
-export default function ResizeHandle( { side, className, onUpdate } ) {
+export default function ResizeHandle( { side, className, onUpdate, cols = 12 } ) {
     const handleRef = useRef();
-    
-    // We store the 'active' state in a Ref so the Window listeners 
-    // can access the latest values without being re-registered.
+
+    // Using a Ref to store drag state so that mousemove handlers
     const dragData = useRef({
         isDragging: false,
         gridRect: null,
         lastSnapped: null,
         className: className,
+        cols: cols,
     });
 
     // Update the Ref whenever the prop className changes
     useEffect(() => {
         dragData.current.className = className;
     }, [className]);
+
+    useEffect(() => {
+        dragData.current.cols = cols;
+    }, [cols]);
 
     useEffect(() => {
         // Get the actual document the handle lives in (the iframe)
@@ -58,7 +60,8 @@ export default function ResizeHandle( { side, className, onUpdate } ) {
             const snapped = snapToColumn(
                 e.clientX,
                 dragData.current.gridRect,
-                side === 'left' ? 'start' : 'end'
+                side === 'left' ? 'start' : 'end',
+                dragData.current.cols
             );
 
             if (snapped !== dragData.current.lastSnapped) {

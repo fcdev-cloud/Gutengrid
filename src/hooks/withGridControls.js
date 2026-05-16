@@ -84,30 +84,40 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
         const { clientId, attributes, setAttributes, isSelected } = props;
         const { className = '' } = attributes;
 
-        const { isInsideGrid, currentInfix, breakpoints } = useSelect( ( select ) => {
-            const { getBlockParents, getBlockName } = select( 'core/block-editor' );
-            const { getBreakpoints } = select( 'gutengrid/options' );
+        const { isInsideGrid, currentInfix, breakpoints, activeCols } = useSelect( ( select ) => {
+                const { getBlockParents, getBlockName, getBlock } = select( 'core/block-editor' );
+                const { getBreakpoints }                          = select( 'gutengrid/options' );
+                const editorStore                                 = select( 'core/editor' );
+                const editPostStore                               = select( 'core/edit-post' );
 
-            const editPostStore = select( 'core/edit-post' );
-            const editorStore = select( 'core/editor' );
-            
-            const device = (
-                editPostStore?.__experimentalGetPreviewDeviceType?.() || 
-                editorStore?.getDeviceType?.() || 
-                'Desktop'
-            );
+                const device = (
+                    editPostStore?.__experimentalGetPreviewDeviceType?.() ||
+                    editorStore?.getDeviceType?.() ||
+                    'Desktop'
+                );
 
-            const parents = getBlockParents( clientId );
-            const immediateParent = parents[ parents.length - 1 ];
-            const allBps = getBreakpoints() || [];
-            const matchedBp = allBps.find( b => b.name === device || b.label === device );
+                const parents         = getBlockParents( clientId );
+                const immediateParent = parents[ parents.length - 1 ];
+                const parentBlock     = getBlock( immediateParent );
+                const allBps          = getBreakpoints() || [];
+                const matchedBp       = allBps.find( ( b ) => b.name === device || b.label === device );
+                const infix           = device === 'Desktop' ? 'base' : ( matchedBp ? matchedBp.name : 'base' );
 
-            return {
-                isInsideGrid: getBlockName( immediateParent ) === GRID_BLOCK_NAME,
-                currentInfix: device === 'Desktop' ? 'base' : ( matchedBp ? matchedBp.name : 'base' ),
-                breakpoints: allBps,
-            };
-        }, [ clientId ] );
+                // Resolve active cols from parent block attributes
+                const { cols, breakpointCols } = parentBlock?.attributes ?? {};
+                const resolvedCols = (
+                    ( infix !== 'base' && breakpointCols?.[ infix ] ) ||
+                    cols ||
+                    12
+                );
+
+                return {
+                    isInsideGrid:  getBlockName( immediateParent ) === GRID_BLOCK_NAME,
+                    currentInfix:  infix,
+                    breakpoints:   allBps,
+                    activeCols:    resolvedCols,
+                };
+            }, [ clientId ] );
 
         if ( ! isInsideGrid ) {
             return <BlockEdit { ...props } />;
@@ -190,11 +200,13 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
                                 side="left"
                                 className={ className }
                                 onUpdate={ handleUpdate }
+                                cols={ activeCols }
                             />
                             <ResizeHandle
                                 side="right"
                                 className={ className }
                                 onUpdate={ handleUpdate }
+                                cols={ activeCols }
                             />
                         </>
                     ) }
