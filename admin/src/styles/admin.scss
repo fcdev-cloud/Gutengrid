@@ -6,6 +6,18 @@
         margin-bottom: 1.5rem;
     }
 
+    &__divider {
+        margin: 2rem 0;
+        border: none;
+        border-top: 1px solid #ddd;
+    }
+
+    &__base-description {
+        color: #555;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
     &__notice {
         margin-bottom: 1.5rem;
     }
@@ -37,6 +49,18 @@
 
         &:active {
             cursor: grabbing;
+        }
+    }
+
+    &__fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        flex: 1;
+
+        .gutengrid-admin__field {
+            flex: 1;
+            min-width: 120px;
         }
     }
 
@@ -74,6 +98,8 @@
             }
         }
     }
+
+    
 
     &__error {
         font-size: 0.75rem;

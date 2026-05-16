@@ -1,16 +1,12 @@
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import { buildInlineStyles } from '../../src/utils/buildInlineStyles';
 
 export default function Save( { attributes } ) {
-    const { columnGap, rowGap } = attributes;
+    const { colGap, rowGap, breakpointGaps, cols, breakpointCols } = attributes;
 
     const blockProps = useBlockProps.save( {
         className: 'gg',
-        style: {
-            columnGap,
-            rowGap,
-            '--gg-column-gap': columnGap,
-            '--gg-row-gap': rowGap,
-        },
+        style: buildInlineStyles( attributes ),
     } );
 
     return (

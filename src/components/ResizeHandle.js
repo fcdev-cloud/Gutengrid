@@ -5,7 +5,7 @@ const COLS = 12;
 const getGridInner = ( element ) => {
     let node = element.parentElement;
     while ( node ) {
-        if ( node.classList.contains( 'gutengrid__inner' ) ) return node;
+        if ( node.classList.contains( 'gg__inner' ) ) return node;
         node = node.parentElement;
     }
     return null;
@@ -54,7 +54,7 @@ export default function ResizeHandle( { side, className, onUpdate } ) {
         const onMouseMove = (e) => {
             // Only execute if this specific handle instance is the one being dragged
             if (!dragData.current.isDragging || !dragData.current.gridRect) return;
-
+            
             const snapped = snapToColumn(
                 e.clientX,
                 dragData.current.gridRect,

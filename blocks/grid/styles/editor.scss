@@ -1,4 +1,4 @@
-.gutengrid {
+.gg {
     position: relative;
     min-height: 100px;
 
@@ -16,27 +16,6 @@
             display: grid;
             grid-template-columns: repeat( 12, 1fr );
             gap: var(--gutengrid-gap);
-        }
-    }
-
-    &--overlay {
-        .gutengrid__inner::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: repeat( 12, 1fr );
-            column-gap: var( --gutengrid-column-gap, 1.5rem );
-            row-gap: var( --gutengrid-row-gap, 1.5rem );
-            pointer-events: none;
-            z-index: 0;
-            background-image: repeating-linear-gradient(
-                to right,
-                rgba( 99, 102, 241, 0.08 ) 0,
-                rgba( 99, 102, 241, 0.08 ) calc( ( 100% - ( 11 * var( --gutengrid-gap, 1.5rem ) ) ) / 12 ),
-                transparent calc( ( 100% - ( 11 * var( --gutengrid-column-gap, 1.5rem ) ) ) / 12 ),
-                transparent calc( ( 100% - ( 11 * var( --gutengrid-column-gap, 1.5rem ) ) ) / 12 + var( --gutengrid-column-gap, 1.5rem ) )
-            );
         }
     }
 }

@@ -10,9 +10,6 @@ class GutenGrid_CSS_Generator {
     const COLUMNS        = 12;
     const PREFIX         = 'gg';
 
-    /**
-     * Generate the container query stylesheet and write it to the uploads directory
-     */
     public static function generate( $breakpoints = null ) {
         if ( null === $breakpoints ) {
             $breakpoints = GutenGrid_Options::get_breakpoints();
@@ -33,26 +30,32 @@ class GutenGrid_CSS_Generator {
         update_option( 'gutengrid_css_version', time() );
     }
 
-    /**
-     * Build the full CSS string
-     */
     private static function build_css( $breakpoints ) {
         $css = "/* GutenGrid Generated CSS */\n\n";
 
-        // Base grid container and item resets
+        $css .= self::build_root_variables( $breakpoints );
         $css .= self::build_container_css();
-
-        // Global Z-Index Utilities
         $css .= self::build_z_index_classes();
 
-        // Mobile and desktop utility classes
+        // Base utility classes — no container query, applies below first breakpoint
         $css .= "/* Base Utilities */\n";
         $css .= self::build_utility_classes( 'base' );
 
-        // breakpoint utility classes
-        foreach ( $breakpoints as $bp ) {
-            $css .= "/* Breakpoint: {$bp['label']} ({$bp['width']}) */\n";
-            $css .= "@media (min-width: {$bp['width']}) {\n";
+        // Per-breakpoint utility classes with ranged container queries
+        foreach ( $breakpoints as $index => $bp ) {
+            $min_width  = $bp['width'];
+            $next_bp    = $breakpoints[ $index + 1 ] ?? null;
+            $max_width  = $next_bp ? $next_bp['width'] : null;
+
+            $css .= "/* Breakpoint: {$bp['name']} ({$min_width}" . ( $max_width ? " — {$max_width}" : "+" ) . ") */\n";
+
+            if ( $max_width ) {
+                $css .= "@container (min-width: {$min_width}) and (max-width: calc( {$max_width} - 1px )) {\n";
+            } else {
+                // Last breakpoint — no upper bound
+                $css .= "@container (min-width: {$min_width}) {\n";
+            }
+
             $css .= self::build_utility_classes( $bp['name'] );
             $css .= "}\n\n";
         }
@@ -61,67 +64,90 @@ class GutenGrid_CSS_Generator {
     }
 
     /**
-     * The core grid container styles
+     * Global CSS custom property defaults.
+     * Per-breakpoint defaults use standard media queries on :root
      */
+    private static function build_root_variables( $breakpoints ) {
+        $base = GutenGrid_Options::get_base();
+
+        $css  = ":root {\n";
+        $css .= "    --gg-col-gap: {$base['colGap']};\n";
+        $css .= "    --gg-row-gap: {$base['rowGap']};\n";
+        $css .= "    --gg-cols: {$base['cols']};\n";
+        $css .= "}\n\n";
+
+        foreach ( $breakpoints as $bp ) {
+            $col_gap = $bp['colGap'] ?? '1.5rem';
+            $row_gap = $bp['rowGap'] ?? '1.5rem';
+            $cols    = $bp['cols']   ?? self::COLUMNS;
+
+            $css .= "@media (min-width: {$bp['width']}) {\n";
+            $css .= "    :root {\n";
+            $css .= "        --gg-{$bp['name']}-col-gap: {$col_gap};\n";
+            $css .= "        --gg-{$bp['name']}-row-gap: {$row_gap};\n";
+            $css .= "        --gg-{$bp['name']}-cols: {$cols};\n";
+            $css .= "    }\n";
+            $css .= "}\n\n";
+        }
+
+        return $css;
+    }
+
     private static function build_container_css() {
         $prefix = self::PREFIX;
-        return "
+        $cols   = self::COLUMNS;
+
+        return <<<CSS
 .{$prefix} {
     container-type: inline-size;
 }
 
 .{$prefix}__inner {
     display: grid;
-    grid-template-columns: repeat( " . self::COLUMNS . ", 1fr );
-    column-gap: var( --gutengrid-column-gap, 1.5rem );
-    row-gap: var( --gutengrid-row-gap, 1.5rem );
+    grid-template-columns: repeat( var( --gg-cols, {$cols} ), 1fr );
+    column-gap: var( --gg-col-gap, 1.5rem );
+    row-gap: var( --gg-row-gap, 1.5rem );
 }
 
 .{$prefix}__inner > * {
     margin-block-start: 0 !important;
     margin-block-end: 0 !important;
-    grid-column: span " . self::COLUMNS . "; /* Default full width */
-}\n\n";
+    grid-column: span var( --gg-cols, {$cols} );
+}
+
+CSS;
     }
 
-    /**
-     * Build Z-Index classes
-     */
     private static function build_z_index_classes() {
         $prefix = self::PREFIX;
-        $css = "/* Z-Index / Layering */\n";
-        
-        // Negative and Top
+        $css    = "/* Z-Index / Layering */\n";
+
         $css .= ".{$prefix}-z-neg { z-index: -1; }\n";
         $css .= ".{$prefix}-z-top { z-index: 100; }\n";
 
-        // 1-10 scale
         for ( $i = 1; $i <= 10; $i++ ) {
             $css .= ".{$prefix}-z-{$i} { z-index: {$i}; }\n";
         }
-        
+
         return $css . "\n";
     }
 
-    /**
-     * Build col-start, col-span, and row-start classes for a given breakpoint
-     */
     private static function build_utility_classes( $bp ) {
         $prefix = self::PREFIX;
         $infix  = $bp === 'base' ? '' : "-{$bp}";
-        $css    = "";
+        $css    = '';
 
-        // Column Start: 1–13
+        // Column start: 1–13
         for ( $i = 1; $i <= self::COLUMNS + 1; $i++ ) {
             $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i}; }\n";
         }
 
-        // Column Span: 1–12
+        // Column span: 1–12
         for ( $i = 1; $i <= self::COLUMNS; $i++ ) {
             $css .= ".{$prefix}{$infix}-col-z-{$i} { grid-column-end: span {$i}; }\n";
         }
 
-        // Row Start: 1–20 (Decent range for reordering)
+        // Row start: 1–20
         for ( $i = 1; $i <= 20; $i++ ) {
             $css .= ".{$prefix}{$infix}-row-s-{$i} { grid-row-start: {$i}; }\n";
         }
@@ -129,9 +155,6 @@ class GutenGrid_CSS_Generator {
         return $css;
     }
 
-    /**
-     * Get the URL of the generated CSS file
-     */
     public static function get_generated_file_url() {
         $upload_dir = wp_upload_dir();
         $file_path  = $upload_dir['basedir'] . '/' . self::GENERATED_FILE;
@@ -143,9 +166,6 @@ class GutenGrid_CSS_Generator {
         return $upload_dir['baseurl'] . '/' . self::GENERATED_FILE;
     }
 
-    /**
-     * Get the version timestamp for cache busting
-     */
     public static function get_generated_file_version() {
         return get_option( 'gutengrid_css_version', '1.0.0' );
     }

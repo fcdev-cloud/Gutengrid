@@ -54,24 +54,29 @@ class GutenGrid_Assets {
         if ( ! $generated_css ) {
             return $settings;
         }
-
+        $settings['ggBase'] = GutenGrid_Options::get_base();
         $settings['styles'][] = [
             'css' => sprintf(
                 '@import url("%s");',
                 esc_url( $generated_css )
             ),
         ];
-        $breakpoints = GutenGrid_Options::get_breakpoints();
-        $device_types= [[ 'name' => 'Desktop', 'label' => 'Desktop' ]];
-        foreach($breakpoints as $bp) {
+
+        $breakpoints  = GutenGrid_Options::get_breakpoints();
+        $device_types = [ [ 'name' => 'Desktop', 'label' => 'Desktop' ] ];
+
+        foreach ( $breakpoints as $bp ) {
             $device_types[] = [
-                'name' => $bp['name'],
-                'label' => strtoupper($bp['name']),
-                'width' => $bp['width'],
+                'name'   => $bp['name'],
+                'label'  => strtoupper( $bp['name'] ),
+                'width'  => $bp['width'],
+                'colGap' => $bp['colGap'] ?? '1.5rem',
+                'rowGap' => $bp['rowGap'] ?? '1.5rem',
+                'cols'   => $bp['cols']   ?? 12,
             ];
         }
-        $settings['deviceTypes'] = $device_types;
 
+        $settings['deviceTypes'] = $device_types;
 
         return $settings;
     }

@@ -15,21 +15,32 @@
     "align": [ "wide", "full" ],
     "spacing": {
       "padding": true,
-      "margin": true,
-      "blockGap": true
+      "margin": true
     },
     "color": {
       "background": true
     }
   },
   "attributes": {
-    "columnGap": {
+    "colGap": {
       "type": "string",
-      "default": "1.5rem"
+      "default": ""
     },
     "rowGap": {
       "type": "string",
-      "default": "1.5rem"
+      "default": ""
+    },
+    "breakpointGaps": {
+      "type": "object",
+      "default": {}
+    },
+    "cols": {
+      "type": "number",
+      "default": 12
+    },
+    "breakpointCols": {
+      "type": "object",
+      "default": {}
     }
   }
 }

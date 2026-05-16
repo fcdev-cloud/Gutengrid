@@ -16,12 +16,14 @@ import {
 } from '@dnd-kit/sortable';
 
 import BreakpointRow from './components/BreakpointRow';
+import BaseSettings from './components/BaseSettings';
 import SaveButton from './components/SaveButton';
 import Notice from './components/Notice';
-import { validateBreakpoints } from './utils/validation';
+import { validateBreakpoints, validateBase } from './utils/validation';
 
 export default function App() {
     const [ breakpoints, setBreakpoints ] = useState( [] );
+    const [ base, setBase ]               = useState( { colGap: '1.5rem', rowGap: '1.5rem', cols: 12 } );
     const [ notice, setNotice ]           = useState( null );
     const [ isSaving, setIsSaving ]       = useState( false );
     const [ isLoading, setIsLoading ]     = useState( true );
@@ -33,25 +35,27 @@ export default function App() {
         } )
     );
 
-    // Fetch breakpoints from REST on mount
     useEffect( () => {
-        fetch( `${ gutengridAdmin.restUrl }/breakpoints`, {
-            headers: {
-                'X-WP-Nonce': gutengridAdmin.nonce,
-            },
-        } )
-            .then( ( res ) => res.json() )
-            .then( ( data ) => {
-                // Attach a stable id to each row for dnd-kit
+        Promise.all( [
+            fetch( `${ gutengridAdmin.restUrl }/breakpoints`, {
+                headers: { 'X-WP-Nonce': gutengridAdmin.nonce },
+            } ).then( ( res ) => res.json() ),
+            fetch( `${ gutengridAdmin.restUrl }/base`, {
+                headers: { 'X-WP-Nonce': gutengridAdmin.nonce },
+            } ).then( ( res ) => res.json() ),
+        ] )
+            .then( ( [ breakpointData, baseData ] ) => {
                 setBreakpoints(
-                    data.map( ( bp, i ) => ( { ...bp, id: `${ bp.name }-${ i }` } ) )
+                    breakpointData.map( ( bp, i ) => ( { ...bp, id: `${ bp.name }-${ i }` } ) )
                 );
+                setBase( baseData );
             } )
             .finally( () => setIsLoading( false ) );
     }, [] );
 
-    const errors = validateBreakpoints( breakpoints );
-    const hasErrors = Object.keys( errors ).length > 0;
+    const baseErrors       = validateBase( base );
+    const breakpointErrors = validateBreakpoints( breakpoints );
+    const hasErrors        = Object.keys( baseErrors ).length > 0 || Object.keys( breakpointErrors ).length > 0;
 
     const handleDragEnd = ( event ) => {
         const { active, over } = event;
@@ -64,19 +68,21 @@ export default function App() {
         } );
     };
 
-    const handleChange = ( id, field, value ) => {
+    const handleBreakpointChange = ( id, field, value ) => {
         setBreakpoints( ( prev ) =>
-            prev.map( ( bp ) =>
-                bp.id === id ? { ...bp, [ field ]: value } : bp
-            )
+            prev.map( ( bp ) => bp.id === id ? { ...bp, [ field ]: value } : bp )
         );
+    };
+
+    const handleBaseChange = ( field, value ) => {
+        setBase( ( prev ) => ( { ...prev, [ field ]: value } ) );
     };
 
     const handleAdd = () => {
         const id = `new-${ Date.now() }`;
         setBreakpoints( ( prev ) => [
             ...prev,
-            { id, name: '', width: '' },
+            { id, name: '', width: '', colGap: '1.5rem', rowGap: '1.5rem', cols: 12 },
         ] );
     };
 
@@ -89,23 +95,30 @@ export default function App() {
         setNotice( null );
 
         try {
-            const res = await fetch( `${ gutengridAdmin.restUrl }/breakpoints`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': gutengridAdmin.nonce,
-                },
-                body: JSON.stringify(
-                    // Strip the client-side id before sending to PHP
-                    breakpoints.map( ( { id, ...bp } ) => bp )
-                ),
-            } );
+            await Promise.all( [
+                fetch( `${ gutengridAdmin.restUrl }/breakpoints`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': gutengridAdmin.nonce,
+                    },
+                    body: JSON.stringify(
+                        breakpoints.map( ( { id, ...bp } ) => bp )
+                    ),
+                } ),
+                fetch( `${ gutengridAdmin.restUrl }/base`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': gutengridAdmin.nonce,
+                    },
+                    body: JSON.stringify( base ),
+                } ),
+            ] );
 
-            if ( ! res.ok ) throw new Error();
-
-            setNotice( { type: 'success', message: __( 'Breakpoints saved.', 'gutengrid' ) } );
+            setNotice( { type: 'success', message: __( 'Settings saved.', 'gutengrid' ) } );
         } catch {
-            setNotice( { type: 'error', message: __( 'Failed to save breakpoints.', 'gutengrid' ) } );
+            setNotice( { type: 'error', message: __( 'Failed to save settings.', 'gutengrid' ) } );
         } finally {
             setIsSaving( false );
         }
@@ -127,6 +140,16 @@ export default function App() {
                 />
             ) }
 
+            <BaseSettings
+                base={ base }
+                errors={ baseErrors }
+                onChange={ handleBaseChange }
+            />
+
+            <hr className="gutengrid-admin__divider" />
+
+            <h2>{ __( 'Breakpoints', 'gutengrid' ) }</h2>
+
             <DndContext
                 sensors={ sensors }
                 collisionDetection={ closestCenter }
@@ -140,8 +163,8 @@ export default function App() {
                         <BreakpointRow
                             key={ bp.id }
                             breakpoint={ bp }
-                            errors={ errors[ bp.id ] ?? {} }
-                            onChange={ handleChange }
+                            errors={ breakpointErrors[ bp.id ] ?? {} }
+                            onChange={ handleBreakpointChange }
                             onRemove={ handleRemove }
                         />
                     ) ) }
