@@ -18,6 +18,10 @@
             gap: var(--gutengrid-gap);
         }
     }
+
+    .gutengrid-bring-to-front {
+        z-index: 9999 !important;
+    }
 }
 .gutengrid-resize-container > * {
     margin-block-start: 0;
@@ -63,7 +67,17 @@
         opacity: 1;
     }
 }
-
+.gutengrid-toolbar-separator {
+    border: 1px solid gray !important;
+}
+.gutengrid-stepper-button {
+    &:disabled,
+    &[aria-disabled="true"] {
+        opacity: 0.5;
+        cursor: not-allowed;
+        color: red !important;
+    }
+}
 body.is-resizing-gutengrid {
     /* Prevents other blocks from stealing the 'mouseup' event */
     cursor: col-resize !important;

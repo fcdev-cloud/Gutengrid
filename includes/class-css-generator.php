@@ -37,11 +37,11 @@ class GutenGrid_CSS_Generator {
         $css .= self::build_container_css();
         $css .= self::build_z_index_classes();
 
-        // Base utility classes — no container query, applies below first breakpoint
+        // Base utility classes
         $css .= "/* Base Utilities */\n";
         $css .= self::build_utility_classes( 'base' );
 
-        // Per-breakpoint utility classes with ranged container queries
+        // Per-breakpoint utility classes with ranged media queries
         foreach ( $breakpoints as $index => $bp ) {
             $prev_bp    = $breakpoints[ $index - 1 ] ?? null;
             $min_width  = $prev_bp ? $prev_bp['width'] : '0px';
@@ -134,7 +134,7 @@ CSS;
         $prefix = self::PREFIX;
         $infix  = $bp === 'base' ? '' : "-{$bp}";
         $css    = '';
-
+        $alignment_values = [ 'start', 'center', 'end', 'stretch' ];
         // Column start: 1–13
         for ( $i = 1; $i <= self::COLUMNS + 1; $i++ ) {
             $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i}; }\n";
@@ -148,6 +148,21 @@ CSS;
         // Row start: 1–20
         for ( $i = 1; $i <= 20; $i++ ) {
             $css .= ".{$prefix}{$infix}-row-s-{$i} { grid-row-start: {$i}; }\n";
+        }
+        
+        // Justify-self (horizontal alignment)
+        foreach ( $alignment_values as $value ) {
+            $css .= ".{$prefix}{$infix}-js-{$value} { justify-self: {$value}; }\n";
+        }
+
+        // Align-self (vertical alignment)
+        foreach ( $alignment_values as $value ) {
+            $css .= ".{$prefix}{$infix}-as-{$value} { align-self: {$value}; }\n";
+        }
+        
+        // Order: 1–20
+        for ( $i = 1; $i <= 20; $i++ ) {
+            $css .= ".{$prefix}{$infix}-order-{$i} { order: {$i}; }\n";
         }
 
         return $css;

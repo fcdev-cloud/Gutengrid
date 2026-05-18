@@ -49,7 +49,7 @@ class GutenGrid_Assets {
 
 
     public function inject_editor_styles( $settings ) {
-        $generated_css = GutenGrid_CSS_Generator::get_generated_file_url();
+        $generated_css = GutenGrid_CSS_Generator::get_generated_file_url() . '?ver=' . GutenGrid_CSS_Generator::get_generated_file_version();
 
         if ( ! $generated_css ) {
             return $settings;
