@@ -110,7 +110,7 @@ class GutenGrid_CSS_Generator {
 .{$prefix}__inner > * {
     margin-block-start: 0 !important;
     margin-block-end: 0 !important;
-    grid-column: span var( --gg-cols, {$cols} );
+    grid-column-start: auto;
 }
 
 CSS;
@@ -120,11 +120,11 @@ CSS;
         $prefix = self::PREFIX;
         $css    = "/* Z-Index / Layering */\n";
 
-        $css .= ".{$prefix}-z-neg { z-index: -1; }\n";
-        $css .= ".{$prefix}-z-top { z-index: 100; }\n";
+        $css .= ".{$prefix}-z-neg { z-index: -1 !important; }\n";
+        $css .= ".{$prefix}-z-top { z-index: 100 !important; }\n";
 
         for ( $i = 1; $i <= 10; $i++ ) {
-            $css .= ".{$prefix}-z-{$i} { z-index: {$i}; }\n";
+            $css .= ".{$prefix}-z-{$i} { z-index: {$i} !important; }\n";
         }
 
         return $css . "\n";
@@ -135,34 +135,37 @@ CSS;
         $infix  = $bp === 'base' ? '' : "-{$bp}";
         $css    = '';
         $alignment_values = [ 'start', 'center', 'end', 'stretch' ];
+
+        // Column start: 0 (auto)
+        $css .= ".{$prefix}{$infix}-col-s-0 { grid-column-start: auto !important; }\n";
         // Column start: 1–13
         for ( $i = 1; $i <= self::COLUMNS + 1; $i++ ) {
-            $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i}; }\n";
+            $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i} !important; }\n";
         }
 
         // Column span: 1–12
         for ( $i = 1; $i <= self::COLUMNS; $i++ ) {
-            $css .= ".{$prefix}{$infix}-col-z-{$i} { grid-column-end: span {$i}; }\n";
+            $css .= ".{$prefix}{$infix}-col-z-{$i} { grid-column-end: span {$i} !important; }\n";
         }
 
         // Row start: 1–20
         for ( $i = 1; $i <= 20; $i++ ) {
-            $css .= ".{$prefix}{$infix}-row-s-{$i} { grid-row-start: {$i}; }\n";
+            $css .= ".{$prefix}{$infix}-row-s-{$i} { grid-row-start: {$i} !important; }\n";
         }
-        
+
         // Justify-self (horizontal alignment)
         foreach ( $alignment_values as $value ) {
-            $css .= ".{$prefix}{$infix}-js-{$value} { justify-self: {$value}; }\n";
+            $css .= ".{$prefix}{$infix}-js-{$value} { justify-self: {$value} !important; }\n";
         }
 
         // Align-self (vertical alignment)
         foreach ( $alignment_values as $value ) {
-            $css .= ".{$prefix}{$infix}-as-{$value} { align-self: {$value}; }\n";
+            $css .= ".{$prefix}{$infix}-as-{$value} { align-self: {$value} !important; }\n";
         }
-        
+
         // Order: 1–20
         for ( $i = 1; $i <= 20; $i++ ) {
-            $css .= ".{$prefix}{$infix}-order-{$i} { order: {$i}; }\n";
+            $css .= ".{$prefix}{$infix}-order-{$i} { order: {$i} !important; }\n";
         }
 
         return $css;

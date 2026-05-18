@@ -16,6 +16,12 @@
             display: grid;
             grid-template-columns: repeat( 12, 1fr );
             gap: var(--gutengrid-gap);
+
+            & > * {
+                margin-block-start: 0 !important;
+                margin-block-end: 0 !important;
+                grid-column-start: auto;
+            }
         }
     }
 

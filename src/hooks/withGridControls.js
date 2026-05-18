@@ -32,10 +32,13 @@ const MAX_COLS = 12;
 /**
  * Utility: Generate Select Options
  */
-const colStartOptions = Array.from( { length: MAX_COLS + 1 }, ( _, i ) => ( {
-    label: String( i + 1 ),
-    value: String( i + 1 ),
-} ) );
+const colStartOptions = [
+    { label: 'Auto', value: '0' },
+    ...Array.from( { length: MAX_COLS + 1 }, ( _, i ) => ( {
+        label: String( i + 1 ),
+        value: String( i + 1 ),
+    } ) ),
+];
 
 const colSpanOptions = Array.from( { length: MAX_COLS }, ( _, i ) => ( {
     label: String( i + 1 ),
@@ -154,22 +157,23 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
         }
 
         const handleUpdate = ( side, snapped ) => {
-            const bp = currentInfix;
+            const bp      = currentInfix;
             const current = parseGridClasses( className, bp );
-            const base = parseGridClasses( className, 'base' );
+            const base    = parseGridClasses( className, 'base' );
 
+            const hasExplicitStart = current.colStart || base.colStart;
             const start = parseInt( current.colStart || base.colStart || 1 );
-            const span  = parseInt( current.colSpan || base.colSpan || MAX_COLS );
+            const span  = parseInt( current.colSpan  || base.colSpan  || MAX_COLS );
 
             const newData = { ...current };
 
             if ( side === 'left' ) {
                 const end = start + span;
                 newData.colStart = snapped;
-                newData.colSpan = Math.max( 1, end - snapped );
+                newData.colSpan  = Math.max( 1, end - snapped );
             } else {
-                newData.colSpan = Math.max( 1, snapped - start );
-                newData.colStart = start;
+                newData.colSpan  = Math.max( 1, snapped - start );
+                newData.colStart = hasExplicitStart ? String( start ) : '0';
             }
 
             setAttributes( { className: updateGridClasses( className, bp, newData ) } );
