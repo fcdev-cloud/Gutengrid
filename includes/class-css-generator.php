@@ -164,6 +164,7 @@ CSS;
         }
 
         // Order: 1–20
+        
         for ( $i = 1; $i <= 20; $i++ ) {
             $css .= ".{$prefix}{$infix}-order-{$i} { order: {$i} !important; }\n";
         }
