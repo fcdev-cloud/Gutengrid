@@ -2,9 +2,9 @@
 /**
  * Plugin Name: GutenGrid
  * Plugin URI:  https://github.com/fcdev-cloud/Gutengrid
- * Description: A 12-column container query grid block for WordPress.
+ * Description: A 12-column grid layout block for WordPress.
  * Version:     1.0.0
- * Author:      Your Name
+ * Author:      Frank Collins
  * License:     GPL-2.0-or-later
  * Text Domain: gutengrid
  */
