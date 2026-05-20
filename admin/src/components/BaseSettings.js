@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-
+import { MAX_COLS } from '../../../src/constants';
 export default function BaseSettings( { base, errors, onChange } ) {
     const { colGap, rowGap, cols } = base;
 
@@ -43,9 +43,9 @@ export default function BaseSettings( { base, errors, onChange } ) {
                     <label>{ __( 'Cols', 'gutengrid' ) }</label>
                     <input
                         type="number"
-                        value={ cols ?? 12 }
+                        value={ cols ?? MAX_COLS }
                         min="1"
-                        max="12"
+                        max={ MAX_COLS }
                         onChange={ ( e ) => onChange( 'cols', parseInt( e.target.value ) ) }
                         className={ errors?.cols ? 'has-error' : '' }
                     />

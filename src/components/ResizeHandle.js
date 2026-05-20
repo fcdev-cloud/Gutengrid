@@ -1,9 +1,9 @@
 import { useRef, useEffect } from '@wordpress/element';
-
+import { MAX_COLS, PREFIX } from '../../src/constants';
 const getGridInner = ( element ) => {
     let node = element.parentElement;
     while ( node ) {
-        if ( node.classList.contains( 'gg__inner' ) ) return node;
+        if ( node.classList.contains( `${PREFIX}__inner` ) ) return node;
         node = node.parentElement;
     }
     return null;
@@ -13,7 +13,7 @@ const snapToColumn = ( mouseX, gridRect, type, cols ) => {
     const colWidth = gridRect.width / cols;
     const relativeX = mouseX - gridRect.left;
     
-    // Calculate the nearest grid line (0 to 12)
+    // Calculate the nearest grid line (0 to maxCols)
     const line = Math.round( relativeX / colWidth );
     
     if ( type === 'start' ) {
@@ -21,12 +21,12 @@ const snapToColumn = ( mouseX, gridRect, type, cols ) => {
         return Math.max( 1, Math.min( cols, line + 1 ) );
     } else {
         // Line 1 is the end of column 1 (track 2)
-        // Line 12 is the end of column 12 (track 13)
+        // Line X is the end of column max cols (track maxCols+1)
         return Math.max( 2, Math.min( cols + 1, line + 1 ) );
     }
 };
 
-export default function ResizeHandle( { side, className, onUpdate, cols = 12 } ) {
+export default function ResizeHandle( { side, className, onUpdate, cols = MAX_COLS } ) {
     const handleRef = useRef();
 
     // Using a Ref to store drag state so that mousemove handlers
@@ -73,7 +73,7 @@ export default function ResizeHandle( { side, className, onUpdate, cols = 12 } )
 
         const onMouseUp = () => {
         // Check the Ref directly
-            console.log('Mouse up detected. Was dragging:', dragData.current.isDragging);
+
             if (dragData.current.isDragging) {
                 dragData.current.isDragging = false;
                 document.body.classList.remove('is-resizing-gutengrid');

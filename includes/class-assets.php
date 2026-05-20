@@ -72,7 +72,7 @@ class GutenGrid_Assets {
                 'width'  => $bp['width'],
                 'colGap' => $bp['colGap'] ?? '1.5rem',
                 'rowGap' => $bp['rowGap'] ?? '1.5rem',
-                'cols'   => $bp['cols']   ?? 12,
+                'cols'   => $bp['cols']   ?? GutenGrid_Options::get_max_cols(),
             ];
         }
 

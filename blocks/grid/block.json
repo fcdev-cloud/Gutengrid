@@ -4,7 +4,7 @@
   "name": "gutengrid/grid",
   "title": "GutenGrid",
   "category": "layout",
-  "description": "A 12-column container query grid block.",
+  "description": "A Multi-column container query grid block.",
   "keywords": [ "grid", "layout", "columns" ],
   "textdomain": "gutengrid",
   "editorScript": "file:../../build/index.js",

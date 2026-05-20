@@ -7,7 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class GutenGrid_CSS_Generator {
 
     const GENERATED_FILE = 'gutengrid/gutengrid-grid.css';
-    const COLUMNS        = 12;
     const PREFIX         = 'gg';
 
     public static function generate( $breakpoints = null ) {
@@ -77,7 +76,7 @@ class GutenGrid_CSS_Generator {
             $max_width  = $bp['width'];
             $col_gap = $bp['colGap'] ?? '1.5rem';
             $row_gap = $bp['rowGap'] ?? '1.5rem';
-            $cols    = $bp['cols']   ?? self::COLUMNS;
+            $cols    = $bp['cols']   ?? GutenGrid_Options::get_max_cols();
 
             $css .= "@media (min-width: calc({$min_width} + 1px)) and (max-width: {$max_width}) {\n";
             $css .= "    :root {\n";
@@ -93,7 +92,7 @@ class GutenGrid_CSS_Generator {
 
     private static function build_container_css() {
         $prefix = self::PREFIX;
-        $cols   = self::COLUMNS;
+        $cols   = GutenGrid_Options::get_max_cols();
 
         return <<<CSS
 .{$prefix} {
@@ -139,12 +138,12 @@ CSS;
         // Column start: 0 (auto)
         $css .= ".{$prefix}{$infix}-col-s-0 { grid-column-start: auto !important; }\n";
         // Column start: 1–13
-        for ( $i = 1; $i <= self::COLUMNS + 1; $i++ ) {
+        for ( $i = 1; $i <= GutenGrid_Options::get_max_cols() + 1; $i++ ) {
             $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i} !important; }\n";
         }
 
-        // Column span: 1–12
-        for ( $i = 1; $i <= self::COLUMNS; $i++ ) {
+        // Column span: 1 – max cols
+        for ( $i = 1; $i <= GutenGrid_Options::get_max_cols(); $i++ ) {
             $css .= ".{$prefix}{$infix}-col-z-{$i} { grid-column-end: span {$i} !important; }\n";
         }
 

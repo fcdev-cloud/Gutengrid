@@ -4,12 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class GutenGrid_Options {
-
     const BASE_OPTION_KEY = 'gutengrid_base';
+
+    const MAX_COLS = 12;
+
+    
+
     const DEFAULT_BASE = [
         'colGap' => '1.5rem',
         'rowGap' => '1.5rem',
-        'cols'   => 12,
+        'cols'   => self::MAX_COLS,
     ];
 
     const OPTION_KEY = 'gutengrid_breakpoints';
@@ -20,21 +24,21 @@ class GutenGrid_Options {
             'width'  => '400px',
             'colGap' => '1.5rem',
             'rowGap' => '1.5rem',
-            'cols'   => 12,
+            'cols'   => self::MAX_COLS,
         ],
         [
             'name'   => 'md',
             'width'  => '600px',
             'colGap' => '1.5rem',
             'rowGap' => '1.5rem',
-            'cols'   => 12,
+            'cols'   => self::MAX_COLS,
         ],
         [
             'name'   => 'lg',
             'width'  => '900px',
             'colGap' => '1.5rem',
             'rowGap' => '1.5rem',
-            'cols'   => 12,
+            'cols'   => self::MAX_COLS,
         ]
     ];
 
@@ -42,6 +46,13 @@ class GutenGrid_Options {
         add_action( 'admin_menu', [ $this, 'register_options_page' ] );
         add_action( 'init', [ $this, 'register_settings' ] );
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+    }
+
+    /**
+     * Getter function for max columns
+     */
+    public static function get_max_cols() {
+        return self::MAX_COLS;
     }
 
     /**
@@ -193,7 +204,7 @@ class GutenGrid_Options {
         return [
             'colGap' => sanitize_text_field( $base['colGap'] ?? '1.5rem' ),
             'rowGap' => sanitize_text_field( $base['rowGap'] ?? '1.5rem' ),
-            'cols'   => absint( $base['cols'] ?? 12 ),
+            'cols'   => absint( $base['cols'] ?? self::MAX_COLS ),
         ];
     }
 
@@ -217,7 +228,7 @@ class GutenGrid_Options {
                         'width'  => sanitize_text_field( $bp['width'] ),
                         'colGap' => sanitize_text_field( $bp['colGap'] ?? '1.5rem' ),
                         'rowGap' => sanitize_text_field( $bp['rowGap'] ?? '1.5rem' ),
-                        'cols'   => absint( $bp['cols'] ?? 12 ),
+                        'cols'   => absint( $bp['cols'] ?? self::MAX_COLS ),
                     ];
                 }, $breakpoints )
             )

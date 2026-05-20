@@ -4,13 +4,14 @@ import { useBlockProps, InnerBlocks, BlockControls, InspectorControls } from '@w
 import { ToolbarButton, ToolbarGroup, PanelBody, TextControl, SelectControl } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { column } from '@wordpress/icons';
+import { MAX_COLS,PREFIX } from '../../src/constants';
 import { __ } from '@wordpress/i18n';
 
 import { buildInlineStyles } from '../../src/utils/buildInlineStyles';
 
 const colsOptions = [
     { label: __( 'Default', 'gutengrid' ), value: '' },
-    ...Array.from( { length: 12 }, ( _, i ) => ( {
+    ...Array.from( { length: MAX_COLS }, ( _, i ) => ( {
         label: String( i + 1 ),
         value: String( i + 1 ),
     } ) ),
@@ -36,7 +37,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
         return select( 'core/editor' ).getEditorSettings()?.ggBase ?? {
             colGap: '1.5rem',
             rowGap: '1.5rem',
-            cols:   12,
+            cols:   MAX_COLS,
         };
     }, [] );
 
@@ -103,7 +104,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
     }, [ resolvedColGap, resolvedRowGap, resolvedCols, breakpointCols, breakpointGaps, activeDevice, breakpoints ] );
 
     const blockProps = useBlockProps( {
-        className: `gg ${ showOverlay ? 'gg--overlay' : '' }`,
+        className: `${PREFIX} ${ showOverlay ? `${PREFIX}--overlay` : '' }`,
         style: buildInlineStyles( attributes ),
     } );
 
@@ -120,8 +121,8 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
             const cleaned = className
                 .split( ' ' )
                 .filter( ( c ) => {
-                    const startMatch = c.match( /gg(?:-\w+)?-col-s-(\d+)/ );
-                    const spanMatch  = c.match( /gg(?:-\w+)?-col-z-(\d+)/ );
+                    const startMatch = c.match( `/${PREFIX}(?:-\w+)?-col-s-(\d+)/` );
+                    const spanMatch  = c.match( `/${PREFIX}(?:-\w+)?-col-z-(\d+)/` );
 
                     if ( startMatch && parseInt( startMatch[ 1 ] ) > effectiveCols ) return false;
                     if ( spanMatch  && parseInt( spanMatch[ 1 ] )  > effectiveCols ) return false;
@@ -171,8 +172,8 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
             const cleaned = className
                 .split( ' ' )
                 .filter( ( c ) => {
-                    const startMatch = c.match( new RegExp( `gg-${ bp }-col-s-(\\d+)` ) );
-                    const spanMatch  = c.match( new RegExp( `gg-${ bp }-col-z-(\\d+)` ) );
+                    const startMatch = c.match( new RegExp( `${PREFIX}-${ bp }-col-s-(\\d+)` ) );
+                    const spanMatch  = c.match( new RegExp( `${PREFIX}-${ bp }-col-z-(\\d+)` ) );
 
                     if ( startMatch && parseInt( startMatch[ 1 ] ) > effectiveCols ) return false;
                     if ( spanMatch  && parseInt( spanMatch[ 1 ] )  > effectiveCols ) return false;
@@ -320,7 +321,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
             </InspectorControls>
 
             <div { ...blockProps }>
-                <div ref={ ref } className="gg__inner" style={ showOverlay ? buildOverlayStyle() : {} }>
+                <div ref={ ref } className={`${PREFIX}__inner`} style={ showOverlay ? buildOverlayStyle() : {} }>
                     <InnerBlocks />
                 </div>
             </div>

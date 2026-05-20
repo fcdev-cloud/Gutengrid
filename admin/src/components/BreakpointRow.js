@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { MAX_COLS } from '../../../src/constants';
 
 export default function BreakpointRow( { breakpoint, errors, onChange, onRemove } ) {
     const { id, name, width, colGap, rowGap, cols } = breakpoint;
@@ -96,9 +97,9 @@ export default function BreakpointRow( { breakpoint, errors, onChange, onRemove 
                     <label>{ __( 'Cols', 'gutengrid' ) }</label>
                     <input
                         type="number"
-                        value={ cols ?? 12 }
+                        value={ cols ?? MAX_COLS }
                         min="1"
-                        max="12"
+                        max={ MAX_COLS }
                         onChange={ ( e ) => onChange( id, 'cols', parseInt( e.target.value ) ) }
                         className={ errors.cols ? 'has-error' : '' }
                     />

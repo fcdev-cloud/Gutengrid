@@ -20,10 +20,11 @@ import BaseSettings from './components/BaseSettings';
 import SaveButton from './components/SaveButton';
 import Notice from './components/Notice';
 import { validateBreakpoints, validateBase } from './utils/validation';
+import { MAX_COLS } from '../../src/constants';
 
 export default function App() {
     const [ breakpoints, setBreakpoints ] = useState( [] );
-    const [ base, setBase ]               = useState( { colGap: '1.5rem', rowGap: '1.5rem', cols: 12 } );
+    const [ base, setBase ]               = useState( { colGap: '1.5rem', rowGap: '1.5rem', cols: MAX_COLS } );
     const [ notice, setNotice ]           = useState( null );
     const [ isSaving, setIsSaving ]       = useState( false );
     const [ isLoading, setIsLoading ]     = useState( true );
@@ -82,7 +83,7 @@ export default function App() {
         const id = `new-${ Date.now() }`;
         setBreakpoints( ( prev ) => [
             ...prev,
-            { id, name: '', width: '', colGap: '1.5rem', rowGap: '1.5rem', cols: 12 },
+            { id, name: '', width: '', colGap: '1.5rem', rowGap: '1.5rem', cols: MAX_COLS },
         ] );
     };
 

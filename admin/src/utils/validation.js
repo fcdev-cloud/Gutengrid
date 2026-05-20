@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-
+import { MAX_COLS } from '../../../src/constants';
 const VALID_NAME  = /^[a-z0-9_-]+$/;
 const VALID_WIDTH = /^\d+(\.\d+)?(px|em|rem|vw|vh|%)$/;
 const VALID_GAP   = /^\d+(\.\d+)?(px|em|rem|vw|vh|%)$/;
@@ -16,8 +16,8 @@ export const validateBase = ( base ) => {
         errors.rowGap = __( 'Must be a valid CSS length e.g. 1.5rem.', 'gutengrid' );
     }
 
-    if ( base.cols && ( base.cols < 1 || base.cols > 12 ) ) {
-        errors.cols = __( 'Cols must be between 1 and 12.', 'gutengrid' );
+    if ( base.cols && ( base.cols < 1 || base.cols > MAX_COLS ) ) {
+        errors.cols = __( `Cols must be between 1 and ${ MAX_COLS }.`, 'gutengrid' );
     }
 
     return errors;
@@ -56,8 +56,8 @@ export const validateBreakpoints = ( breakpoints ) => {
             rowErrors.rowGap = __( 'Must be a valid CSS length e.g. 1.5rem.', 'gutengrid' );
         }
 
-        if ( bp.cols && ( bp.cols < 1 || bp.cols > 12 ) ) {
-            rowErrors.cols = __( 'Cols must be between 1 and 12.', 'gutengrid' );
+        if ( bp.cols && ( bp.cols < 1 || bp.cols > MAX_COLS ) ) {
+            rowErrors.cols = __( `Cols must be between 1 and ${ MAX_COLS }.`, 'gutengrid' );
         }
 
         if ( Object.keys( rowErrors ).length > 0 ) {

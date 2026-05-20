@@ -22,12 +22,8 @@ import { justifyLeft,
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-
+import { MAX_COLS, PREFIX, GRID_BLOCK_NAME } from '../../src/constants';
 import ResizeHandle from '../components/ResizeHandle';
-
-const GRID_BLOCK_NAME = 'gutengrid/grid';
-const PREFIX = 'gg';
-const MAX_COLS = 12;
 
 /**
  * Utility: Generate Select Options
