@@ -20,7 +20,14 @@
             & > * {
                 margin-block-start: 0 !important;
                 margin-block-end: 0 !important;
-                grid-column-start: auto;
+                grid-column-start: var( --gg-col-start, auto );
+                grid-column-end:   span var( --gg-col-span, var( --gg-cols, 12 ) );
+                grid-row-start:    var( --gg-row-start, auto );
+                grid-row-end:      span var( --gg-row-span, 1 );
+                justify-self:      var( --gg-justify-self );
+                align-self:        var( --gg-align-self );
+                order:             var( --gg-order );
+                z-index:           var(--gg-z-index, 1);
             }
         }
     }

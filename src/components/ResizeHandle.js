@@ -1,12 +1,8 @@
 import { useRef, useEffect } from '@wordpress/element';
 import { MAX_COLS, PREFIX } from '../../src/constants';
 const getGridInner = ( element ) => {
-    let node = element.parentElement;
-    while ( node ) {
-        if ( node.classList.contains( `${PREFIX}__inner` ) ) return node;
-        node = node.parentElement;
-    }
-    return null;
+    // Check to see if element is inside the inner container
+    return element.closest( `.${PREFIX}__inner` );
 };
 
 const snapToColumn = ( mouseX, gridRect, type, cols ) => {

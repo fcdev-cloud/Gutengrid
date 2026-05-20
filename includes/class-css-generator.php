@@ -4,6 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if(!function_exists('var_error_log')) {
+    function var_error_log( $object=null ){
+        ob_start();
+        var_dump( $object );
+        $content = ob_get_contents();
+        ob_end_clean();
+        error_log( $content );
+    }
+}
+
 class GutenGrid_CSS_Generator {
 
     const GENERATED_FILE = 'gutengrid/gutengrid-grid.css';
@@ -30,27 +40,29 @@ class GutenGrid_CSS_Generator {
     }
 
     private static function build_css( $breakpoints ) {
+        $prefix = self::PREFIX;
         $css = "/* GutenGrid Generated CSS */\n\n";
-
         $css .= self::build_root_variables( $breakpoints );
         $css .= self::build_container_css();
-        $css .= self::build_z_index_classes();
-
-        // Base utility classes
-        $css .= "/* Base Utilities */\n";
-        $css .= self::build_utility_classes( 'base' );
 
         // Per-breakpoint utility classes with ranged media queries
         foreach ( $breakpoints as $index => $bp ) {
             $prev_bp    = $breakpoints[ $index - 1 ] ?? null;
             $min_width  = $prev_bp ? $prev_bp['width'] : '0px';
             $max_width  = $bp['width'];
-
-            $css .= "/* Breakpoint: {$bp['name']} ({$min_width}" . ( $max_width ? " — {$max_width}" : "+" ) . ") */\n";
-
+            $max_cols = GutenGrid_Options::get_max_cols();
+            $css .='/* Utility classes for breakpoint: ' . $bp['name'] . " */\n";
+            
             $css .= "@media (min-width: calc({$min_width} + 1px)) and (max-width: {$max_width}) {\n";
-
-            $css .= self::build_utility_classes( $bp['name'] );
+            $css .= ".{$prefix}__inner > * {\n";
+            $css .= "    grid-column-start: var( --{$prefix}-col-start-{$bp['name']}, var( --{$prefix}-col-start, auto ) );\n";
+            $css .= "    grid-column-end:   span var( --{$prefix}-col-span-{$bp['name']}, var( --{$prefix}-col-span, var( --{$prefix}-cols, {$max_cols} ) ) );\n";
+            $css .= "    grid-row-start:    var( --{$prefix}-row-start-{$bp['name']}, var( --{$prefix}-row-start, auto ) );\n";
+            $css .= "    grid-row-end:      span var( --{$prefix}-row-span-{$bp['name']}, var( --{$prefix}-row-span, 1 ) );\n";
+            $css .= "    justify-self:      var( --{$prefix}-justify-self-{$bp['name']}, var( --{$prefix}-justify-self ) );\n";
+            $css .= "    align-self:        var( --{$prefix}-align-self-{$bp['name']}, var( --{$prefix}-align-self ) );\n";
+            $css .= "    order:             var( --{$prefix}-order-{$bp['name']}, var( --{$prefix}-order ) );\n";
+            $css .= "}\n\n";
             $css .= "}\n\n";
         }
 
@@ -63,11 +75,12 @@ class GutenGrid_CSS_Generator {
      */
     private static function build_root_variables( $breakpoints ) {
         $base = GutenGrid_Options::get_base();
-
+        $prefix = self::PREFIX;
         $css  = ":root {\n";
-        $css .= "    --gg-col-gap: {$base['colGap']};\n";
-        $css .= "    --gg-row-gap: {$base['rowGap']};\n";
-        $css .= "    --gg-cols: {$base['cols']};\n";
+        $css .= "    --{$prefix}-col-gap: {$base['colGap']};\n";
+        $css .= "    --{$prefix}-row-gap: {$base['rowGap']};\n";
+        $css .= "    --{$prefix}-cols: {$base['cols']};\n";
+        $css .= "    --{$prefix}-z-index: 1";
         $css .= "}\n\n";
 
         foreach ( $breakpoints as $index => $bp ) {
@@ -80,9 +93,9 @@ class GutenGrid_CSS_Generator {
 
             $css .= "@media (min-width: calc({$min_width} + 1px)) and (max-width: {$max_width}) {\n";
             $css .= "    :root {\n";
-            $css .= "        --gg-{$bp['name']}-col-gap: {$col_gap};\n";
-            $css .= "        --gg-{$bp['name']}-row-gap: {$row_gap};\n";
-            $css .= "        --gg-{$bp['name']}-cols: {$cols};\n";
+            $css .= "        --{$prefix}-{$bp['name']}-col-gap: {$col_gap};\n";
+            $css .= "        --{$prefix}-{$bp['name']}-row-gap: {$row_gap};\n";
+            $css .= "        --{$prefix}-{$bp['name']}-cols: {$cols};\n";
             $css .= "    }\n";
             $css .= "}\n\n";
         }
@@ -101,75 +114,27 @@ class GutenGrid_CSS_Generator {
 
 .{$prefix}__inner {
     display: grid;
-    grid-template-columns: repeat( var( --gg-cols, {$cols} ), 1fr );
-    column-gap: var( --gg-col-gap, 1.5rem );
-    row-gap: var( --gg-row-gap, 1.5rem );
+    grid-template-columns: repeat( var( --{$prefix}-cols, {$cols} ), 1fr );
+    column-gap: var( --{$prefix}-col-gap, 1.5rem );
+    row-gap: var( --{$prefix}-row-gap, 1.5rem );
 }
 
 .{$prefix}__inner > * {
     margin-block-start: 0 !important;
     margin-block-end: 0 !important;
-    grid-column-start: auto;
+    grid-column-start: var( --{$prefix}-col-start, auto );
+    grid-column-end:   span var( --{$prefix}-col-span, var( --{$prefix}-cols, {$cols} ) );
+    grid-row-start:    var( --{$prefix}-row-start, auto );
+    grid-row-end:      span var( --{$prefix}-row-span, 1 );
+    justify-self:      var( --{$prefix}-justify-self );
+    align-self:        var( --{$prefix}-align-self );
+    order:             var( --{$prefix}-order );
+    z-index:           var(--{$prefix}-z-index, 1);
 }
 
 CSS;
     }
 
-    private static function build_z_index_classes() {
-        $prefix = self::PREFIX;
-        $css    = "/* Z-Index / Layering */\n";
-
-        $css .= ".{$prefix}-z-neg { z-index: -1 !important; }\n";
-        $css .= ".{$prefix}-z-top { z-index: 100 !important; }\n";
-
-        for ( $i = 1; $i <= 10; $i++ ) {
-            $css .= ".{$prefix}-z-{$i} { z-index: {$i} !important; }\n";
-        }
-
-        return $css . "\n";
-    }
-
-    private static function build_utility_classes( $bp ) {
-        $prefix = self::PREFIX;
-        $infix  = $bp === 'base' ? '' : "-{$bp}";
-        $css    = '';
-        $alignment_values = [ 'start', 'center', 'end', 'stretch' ];
-
-        // Column start: 0 (auto)
-        $css .= ".{$prefix}{$infix}-col-s-0 { grid-column-start: auto !important; }\n";
-        // Column start: 1–13
-        for ( $i = 1; $i <= GutenGrid_Options::get_max_cols() + 1; $i++ ) {
-            $css .= ".{$prefix}{$infix}-col-s-{$i} { grid-column-start: {$i} !important; }\n";
-        }
-
-        // Column span: 1 – max cols
-        for ( $i = 1; $i <= GutenGrid_Options::get_max_cols(); $i++ ) {
-            $css .= ".{$prefix}{$infix}-col-z-{$i} { grid-column-end: span {$i} !important; }\n";
-        }
-
-        // Row start: 1–20
-        for ( $i = 1; $i <= 20; $i++ ) {
-            $css .= ".{$prefix}{$infix}-row-s-{$i} { grid-row-start: {$i} !important; }\n";
-        }
-
-        // Justify-self (horizontal alignment)
-        foreach ( $alignment_values as $value ) {
-            $css .= ".{$prefix}{$infix}-js-{$value} { justify-self: {$value} !important; }\n";
-        }
-
-        // Align-self (vertical alignment)
-        foreach ( $alignment_values as $value ) {
-            $css .= ".{$prefix}{$infix}-as-{$value} { align-self: {$value} !important; }\n";
-        }
-
-        // Order: 1–20
-        
-        for ( $i = 1; $i <= 20; $i++ ) {
-            $css .= ".{$prefix}{$infix}-order-{$i} { order: {$i} !important; }\n";
-        }
-
-        return $css;
-    }
 
     public static function get_generated_file_url() {
         $upload_dir = wp_upload_dir();
