@@ -36,6 +36,10 @@
         z-index: 9999 !important;
     }
 }
+
+.gutengrid-resize-container {
+    transition: all 0.3s ease;
+}
 .gutengrid-resize-container > * {
     margin-block-start: 0;
     margin-block-end: 0;
@@ -62,19 +66,61 @@
 
 .gutengrid-resize-handle {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 8px;
-    background: #007cba;
+    height: 15px;
+    width: 15px;
+    border-radius: 100px !important;
+    border: 3px solid #007cba;
     opacity: 0;
+    background-color:#e5e6e6;
+    box-shadow: 0px 0px 6px -2px rgba(0,0,0,0.46);
     cursor: ew-resize;
     transition: opacity 0.15s ease;
     border-radius: 4px;
     z-index: 10;
+    &--left  { 
+        left: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    &--right { 
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    &--top  { 
+        top: -4px;
+        cursor: ns-resize;
+        &-left {
+            top: -4px; 
+            left: -4px;
+            cursor: nw-resize;
+        }
+        &-right {
+            top: -4px; 
+            right: -4px;
+            cursor: ne-resize;
+        }
+    }
+    &--bottom { 
+        bottom: -4px; 
+        cursor: ns-resize;
+        &-left {
+            left: -4px;
+            bottom: -4px; 
+            cursor: sw-resize;
+        }
+        &-right {
+            right: -4px;
+            bottom: -4px; 
+            cursor: se-resize;
+        }
 
-    &--left  { left: -4px; }
-    &--right { right: -4px; }
-
+    }
+    &--top,
+    &--bottom {
+        left: 50%;
+        transform: translateX(-50%);
+    }
     .wp-block:hover &,
     .wp-block.is-selected & {
         opacity: 1;

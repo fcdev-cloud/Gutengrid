@@ -1,5 +1,6 @@
 import { useRef, useEffect } from '@wordpress/element';
 import { MAX_COLS, PREFIX } from '../../src/constants';
+
 const getGridInner = ( element ) => {
     // Check to see if element is inside the inner container
     return element.closest( `.${PREFIX}__inner` );
@@ -22,22 +23,37 @@ const snapToColumn = ( mouseX, gridRect, type, cols ) => {
     }
 };
 
-export default function ResizeHandle( { side, className, onUpdate, cols = MAX_COLS } ) {
+
+const snapToRow = ( mouseY, gridInner ) => {
+    const computedRows = getComputedStyle( gridInner ).gridTemplateRows;
+    console.log('computed rows', computedRows);
+    const rowSizes = computedRows.split( ' ' ).map( parseFloat );
+    
+    const gridTop = gridInner.getBoundingClientRect().top;
+    const relativeY = mouseY - gridTop;
+
+    let cumulative = 0;
+    for ( let i = 0; i < rowSizes.length; i++ ) {
+        cumulative += rowSizes[ i ];
+        if ( relativeY <= cumulative ) {
+            return i + 1; // 1-indexed row number
+        }
+    }
+
+    return rowSizes.length + 1; // past the last row
+};
+
+export default function ResizeHandle( { side, onUpdate, cols = MAX_COLS } ) {
     const handleRef = useRef();
 
     // Using a Ref to store drag state so that mousemove handlers
     const dragData = useRef({
         isDragging: false,
         gridRect: null,
+        gridInner: null,
         lastSnapped: null,
-        className: className,
         cols: cols,
     });
-
-    // Update the Ref whenever the prop className changes
-    useEffect(() => {
-        dragData.current.className = className;
-    }, [className]);
 
     useEffect(() => {
         dragData.current.cols = cols;
@@ -46,23 +62,28 @@ export default function ResizeHandle( { side, className, onUpdate, cols = MAX_CO
     useEffect(() => {
         // Get the actual document the handle lives in (the iframe)
         const localDoc = handleRef.current?.ownerDocument || document;
+
         // Get the top-level document (the main editor UI)
         const topDoc = window.top.document;
 
         const onMouseMove = (e) => {
-            // Only execute if this specific handle instance is the one being dragged
             if (!dragData.current.isDragging || !dragData.current.gridRect) return;
-            
-            const snapped = snapToColumn(
-                e.clientX,
-                dragData.current.gridRect,
-                side === 'left' ? 'start' : 'end',
-                dragData.current.cols
-            );
 
-            if (snapped !== dragData.current.lastSnapped) {
+            const { gridRect, gridInner, cols } = dragData.current;
+            
+
+            const movesCol = side.includes( 'left' ) || side.includes( 'right' );
+            const movesRow = side.includes( 'top' )  || side.includes( 'bottom' );
+            
+            const colSnap = movesCol ? snapToColumn( e.clientX, gridRect, side.includes( 'left' ) ? 'start' : 'end', cols ) : null;
+            const rowSnap = movesRow ? snapToRow( e.clientY, gridInner ) : null;
+
+
+            const snapped = { col: colSnap, row: rowSnap };
+
+            if ( snapped.col !== dragData.current.lastSnapped?.col || snapped.row !== dragData.current.lastSnapped?.row ) {
                 dragData.current.lastSnapped = snapped;
-                onUpdate(side, snapped, dragData.current.className);
+                onUpdate( side, snapped );
             }
         };
 
@@ -93,7 +114,8 @@ export default function ResizeHandle( { side, className, onUpdate, cols = MAX_CO
         const gridInner = getGridInner(handleRef.current);
         if (!gridInner) return;
 
-        dragData.current.gridRect = gridInner.getBoundingClientRect();
+        dragData.current.gridRect   = gridInner.getBoundingClientRect();
+        dragData.current.gridInner  = gridInner;
         dragData.current.isDragging = true;
         dragData.current.lastSnapped = null;
 

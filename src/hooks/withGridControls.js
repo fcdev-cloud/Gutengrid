@@ -24,6 +24,7 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { MAX_COLS, GRID_BLOCK_NAME } from '../../src/constants';
 import ResizeHandle from '../components/ResizeHandle';
+import { buildGutengridStyles } from '../filters/withGridStyles';
 
 /**
  * Utility: Get styles for a specific breakpoint
@@ -96,24 +97,38 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
 
         const currentParsed = getBpStyles( gutengridStyles, currentInfix );
 
-        const handleUpdate = ( side, snapped ) => {
+        const handleUpdate = ( side, { col, row } ) => {
             const bp      = currentInfix;
             const current = getBpStyles( gutengridStyles, bp );
             const base    = getBpStyles( gutengridStyles, 'base' );
 
             const hasExplicitStart = current.colStart || base.colStart;
-            const start = parseInt( current.colStart || base.colStart || 1 );
-            const span  = parseInt( current.colSpan  || base.colSpan  || MAX_COLS );
+            const colStart = parseInt( current.colStart || base.colStart || 1 );
+            const colSpan  = parseInt( current.colSpan  || base.colSpan  || MAX_COLS );
+            const rowStart = parseInt( current.rowStart || base.rowStart || 1 );
+            const rowSpan  = parseInt( current.rowSpan  || base.rowSpan  || 1 );
 
             const newData = { ...current };
 
-            if ( side === 'left' ) {
-                const end = start + span;
-                newData.colStart = String( snapped );
-                newData.colSpan  = String( Math.max( 1, end - snapped ) );
-            } else {
-                newData.colSpan  = String( Math.max( 1, snapped - start ) );
-                newData.colStart = hasExplicitStart ? String( start ) : '0';
+            if ( col !== null ) {
+                if ( side.includes( 'left' ) ) {
+                    const colEnd = colStart + colSpan;
+                    newData.colStart = String( col );
+                    newData.colSpan  = String( Math.max( 1, colEnd - col ) );
+                } else {
+                    newData.colSpan  = String( Math.max( 1, col - colStart ) );
+                    newData.colStart = hasExplicitStart ? String( colStart ) : '0';
+                }
+            }
+
+            if ( row !== null ) {
+                if ( side.includes( 'top' ) ) {
+                    const rowEnd = rowStart + rowSpan;
+                    newData.rowStart = String( row );
+                    newData.rowSpan  = String( Math.max( 1, rowEnd - row ) );
+                } else {
+                    newData.rowSpan = String( Math.max( 1, row - rowStart ) );
+                }
             }
 
             setAttributes( { gutengridStyles: updateBpStyles( gutengridStyles, bp, newData ) } );
@@ -176,8 +191,8 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
                         <TextControl
                             label={ __( 'Col span', 'gutengrid' ) }
                             type="number"
-                            min="0"
-                            max={MAX_COLS + 1}
+                            min="1"
+                            max={MAX_COLS}
                             value={ current.colSpan ?? '' }
                             onChange={ ( val ) => updateField( 'colSpan', val ) }
                         />
@@ -222,53 +237,26 @@ const withGridControls = createHigherOrderComponent( ( BlockEdit ) => {
             );
         };
 
+        const handleDirections = ['top','top-right','right','bottom-right','bottom','bottom-left','left','top-left'];
+  
         return (
             <>
-                <div className={ `gutengrid-resize-container${ isSelected ? ' gutengrid-bring-to-front' : '' }` } style={ { position: 'relative' } }>
+                <div 
+                className={ `gutengrid-resize-container${ isSelected ? ' gutengrid-bring-to-front' : '' }` }
+                style={ { position: 'relative', ...buildGutengridStyles( gutengridStyles ) } }
+                >
                     <BlockEdit { ...props } />
 
                     { isSelected && (
                         <>
-                            <ResizeHandle
-                                side="top-left"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="top"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="top-right"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="right"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="bottom-right"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="bottom"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="bottom-left"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
-                            <ResizeHandle
-                                side="left"
-                                onUpdate={ handleUpdate }
-                                cols={ activeCols }
-                            />
+                            {handleDirections.map((direction) =>{
+                                return ( <ResizeHandle
+                                    key={direction}
+                                    side={direction}
+                                    onUpdate={ handleUpdate }
+                                    cols={ activeCols }
+                                /> )
+                            })}
                         </>
                     ) }
                 </div>
